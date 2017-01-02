@@ -26,10 +26,11 @@
 }
 
 #game {
-  width: 500px;
+  max-width: 500px;
   height: 500px;
   border: 1px solid black;
   position: relative;
+  margin: auto;
 }
 
 #scissors {

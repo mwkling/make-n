@@ -16,6 +16,9 @@ function splitAllNums() {
       var x = (parseFloat(num.getAttribute('data-x')) || 0),
           y = (parseFloat(num.getAttribute('data-y')) || 0);
 
+      // Value is now only the first digit
+      num.setAttribute('value', num.getAttribute('value')[0]);
+
       for (var i = 1; i < digits.length; i++) {
         var digit = digits[i];
         var newNum = jQuery('<div/>', {
@@ -70,10 +73,13 @@ function dragEndListener (event) {
 
     if(num.id != id) {
       if(thisPos.left + (BOX_WIDTH * thisDigits) == pos.left && thisPos.top == pos.top) {
+        target.setAttribute('value', target.getAttribute('value') + num.getAttribute('value'));
+
         $(num).children().appendTo(target);
         $(num).remove();
       }
       if(thisPos.left - (BOX_WIDTH * digits) == pos.left && thisPos.top == pos.top) {
+        num.setAttribute('value', num.getAttribute('value') + target.getAttribute('value'));
         $(target).children().appendTo(num);
         $(target).remove();
       }
