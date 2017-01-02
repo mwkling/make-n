@@ -4,6 +4,44 @@ var BOX_WIDTH = 50;
 var HALF_BOX = 25;
 var COUNTER = 5;
 
+// Split digits making up any particular number
+function splitAllNums() {
+  var nums = document.querySelectorAll(".num");
+
+  for (var i = 0; i < nums.length; i++) {
+    var num = nums[i];
+
+    var digits = num.querySelectorAll(".digit");
+    if (digits.length > 1) {
+      var x = (parseFloat(num.getAttribute('data-x')) || 0),
+          y = (parseFloat(num.getAttribute('data-y')) || 0);
+
+      for (var i = 1; i < digits.length; i++) {
+        var digit = digits[i];
+        var newNum = jQuery('<div/>', {
+          id: ("box" + COUNTER),
+          class: "num",
+          value: digit.innerText
+        })[0];
+        $(digit).appendTo(newNum);
+        $(newNum).appendTo("#game");
+
+        var newX = x + (i * (BOX_WIDTH + 10));
+        newNum.style.webkitTransform =
+          newNum.style.transform =
+            'translate(' + newX + 'px, ' + y + 'px)';
+        newNum.setAttribute('data-x', newX);
+        newNum.setAttribute('data-y', y);
+
+        COUNTER++;
+      }
+    }
+  }
+
+  resetAllNumSnaps();
+}
+
+// Just keeps the x, y transfrom setup properly on each num
 function dragMoveListener (event) {
   var target = event.target,
       x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
@@ -15,16 +53,13 @@ function dragMoveListener (event) {
   target.setAttribute('data-y', y);
 }
 
+// When done dragging a number, check to see if we need to combine any digits
 function dragEndListener (event) {
   var target = event.target;
 
   var id = target.id;
   var thisPos = $(target).offset();
-  var thisText = target.getAttribute('value');
   var thisDigits = target.children.length
-
-  var x = (parseFloat(target.getAttribute('data-x')) || 0),
-      y = (parseFloat(target.getAttribute('data-y')) || 0);
 
   var nums = document.querySelectorAll(".num");
 
@@ -35,16 +70,10 @@ function dragEndListener (event) {
 
     if(num.id != id) {
       if(thisPos.left + (BOX_WIDTH * thisDigits) == pos.left && thisPos.top == pos.top) {
-        console.log("BOX TO THE RIGHT: ");
-        console.log(num.id);
-
         $(num).children().appendTo(target);
         $(num).remove();
       }
       if(thisPos.left - (BOX_WIDTH * digits) == pos.left && thisPos.top == pos.top) {
-        console.log("BOX TO THE LEFT: ");
-        console.log(num.id);
-
         $(target).children().appendTo(num);
         $(target).remove();
       }
@@ -54,6 +83,8 @@ function dragEndListener (event) {
   resetAllNumSnaps();
 }
 
+// Sets up all the appropriate snapping for joining different numbers
+// Call again whenever numbers change somehow
 function resetAllNumSnaps() {
   var nums = [].slice.call(document.querySelectorAll(".num"));
 
@@ -101,3 +132,4 @@ function resetAllNumSnaps() {
 }
 
 resetAllNumSnaps();
+document.getElementById('scissors').addEventListener('click', splitAllNums);
