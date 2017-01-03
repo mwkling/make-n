@@ -10,6 +10,7 @@
   box-sizing: border-box;
   border: 1px solid black;
   position: absolute;
+  z-index: 100;
 }
 
 .digit {
@@ -57,4 +58,8 @@
   font-size: 50px;
   box-sizing: border-box;
   border: 1px solid black;
+}
+
+.operation.over {
+  background-color: #4e4;
 }

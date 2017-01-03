@@ -137,5 +137,24 @@ function resetAllNumSnaps() {
   }
 }
 
+function setupOperations() {
+  interact(".operation").dropzone({
+    accept: ".num",
+    overlap: 0.5,
+    ondrop: function (event) {
+      console.log("dropped in an operation!");
+      console.log(event.target.innerText);
+      console.log(event.relatedTarget.getAttribute('value'));
+    },
+    ondragenter: function (event) {
+      event.target.classList.add('over');
+    },
+    ondragleave: function (event) {
+      event.target.classList.remove('over');
+    }
+  });
+}
+
 resetAllNumSnaps();
+setupOperations();
 document.getElementById('scissors').addEventListener('click', splitAllNums);
