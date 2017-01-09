@@ -4,6 +4,49 @@ var BOX_WIDTH = 50;
 var HALF_BOX = 25;
 var COUNTER = 5;
 
+var levels = [
+  {nums: [1, 2, 3], goal: 10}
+];
+
+function setupLevel(i) {
+  var level = levels[i];
+  var offset = 100;
+  var value = "";
+
+  for(var i = 0; i < level.nums.length; i++) {
+    value = level.nums[i] + '';
+    makeNum(value, offset, 100);
+    offset = offset + (BOX_WIDTH * value.length) + 10;
+  }
+}
+
+function makeNum(numString, x, y) {
+  var newNum = jQuery('<div/>', {
+    id: ("box" + COUNTER),
+    class: "num",
+    value: numString
+  })[0];
+
+  for (var i = 0; i < numString.length; i++) {
+    var newDigit = jQuery('<span/>', {
+      class: "digit",
+      text: numString[i]
+    });
+    $(newDigit).appendTo(newNum);
+  }
+
+  $(newNum).appendTo("#game");
+
+  newNum.style.webkitTransform =
+    newNum.style.transform =
+      'translate(' + x + 'px, ' + y + 'px)';
+  newNum.setAttribute('data-x', x);
+  newNum.setAttribute('data-y', y);
+
+  resetAllNumSnaps();
+  COUNTER++;
+}
+
 // Split digits making up any particular number
 function splitAllNums() {
   var nums = document.querySelectorAll(".num");
@@ -155,6 +198,6 @@ function setupOperations() {
   });
 }
 
-resetAllNumSnaps();
+setupLevel(0);
 setupOperations();
 document.getElementById('scissors').addEventListener('click', splitAllNums);
