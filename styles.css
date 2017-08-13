@@ -8,9 +8,16 @@
   font-weight: bold;
   font-size: 32px;
   box-sizing: border-box;
-  border: 1px solid black;
+  border: 2px solid black;
   position: absolute;
   z-index: 100;
+}
+
+.num.selectable {
+  border: 2px dashed black;
+}
+.num.selected {
+  border: 2px solid red;
 }
 
 .digit {
@@ -19,11 +26,11 @@
 }
 
 .digit:first-child, .digit:last-child {
-  width: 49px;
+  width: 48px;
 }
 
 .digit:first-child:last-child {
-  width: 48px;
+  width: 46px;
 }
 
 #game {
@@ -58,8 +65,9 @@
   font-size: 50px;
   box-sizing: border-box;
   border: 1px solid black;
+  cursor: pointer;
 }
 
-.operation.over {
+.operation:hover, .operation.selected {
   background-color: #4e4;
 }

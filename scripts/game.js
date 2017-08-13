@@ -4,19 +4,89 @@ var BOX_WIDTH = 50;
 var HALF_BOX = 25;
 var COUNTER = 5;
 
+var SELECTED_NUM = null;
+var SELECTED_OP = null;
+
+var CURRENT_LEVEL = null;
+var CURRENT_GOAL = null;
+
 var levels = [
-  {nums: [1, 2, 3], goal: 10}
+  // Basic operations
+  {nums: [1, 1], goal: 2},
+  {nums: [3, 4], goal: 12},
+  {nums: [1, 2, 3], goal: 7},
+  {nums: [1, 2, 3], goal: 5},  // Multiple ways
+  {nums: [8, 4, 5], goal: 10},
+  {nums: [1, 2, 3], goal: 10}, // Exponents
+  {nums: [2, 5, 1], goal: 33},
+
+  // Concatenation
+  {nums: [1, 1], goal: 11},
+  {nums: [4, 4, 8], goal: 81},
+  {nums: [1, 2, 3], goal: 36},
+
+  // Digit splitting
+  {nums: [7, 8], goal: 65},
+  {nums: [6, 3], goal: 10},
+  {nums: [4, 4], goal: 53},
+
+  // Harder
+  {nums: [6, 8, 6], goal: 82},
+  {nums: [4, 1, 2], goal: 46},
+  {nums: [7, 7, 2], goal: 47},
+  {nums: [7, 8, 8], goal: 72},
+  {nums: [3, 2, 6], goal: 71},
+  {nums: [5, 6, 5], goal: 59}
 ];
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function setupRandomLevel() {
+  var value = "";
+  var offset = 100;
+
+  $(".num").remove();
+  for(var i = 0; i < 3; i++) {
+    value = getRandomInt(1, 9) + '';
+    makeNum(value, offset, 100);
+    offset = offset + (BOX_WIDTH * value.length) + 10;
+  }
+  var goal = getRandomInt(1, 100);
+  document.getElementById("goal").innerHTML = goal;
+  CURRENT_GOAL = goal;
+}
+
 function setupLevel(i) {
+  CURRENT_LEVEL = i;
   var level = levels[i];
   var offset = 100;
   var value = "";
 
+  $(".num").remove();
   for(var i = 0; i < level.nums.length; i++) {
     value = level.nums[i] + '';
     makeNum(value, offset, 100);
     offset = offset + (BOX_WIDTH * value.length) + 10;
+  }
+  document.getElementById("goal").innerHTML = level.goal;
+}
+
+function checkGoal() {
+  //var goal = levels[CURRENT_LEVEL].goal + '';
+  var goal = CURRENT_GOAL;
+
+  var nums = document.querySelectorAll(".num");
+  if(nums.length == 1) {
+    if(nums[0].getAttribute("value") == goal) {
+      alert("yay");
+      //CURRENT_LEVEL += 1;
+      //setupLevel(CURRENT_LEVEL);
+      setupRandomLevel();
+    }
   }
 }
 
@@ -130,6 +200,7 @@ function dragEndListener (event) {
   }
 
   resetAllNumSnaps();
+  checkGoal();
 }
 
 // Sets up all the appropriate snapping for joining different numbers
@@ -180,24 +251,75 @@ function resetAllNumSnaps() {
   }
 }
 
+function selectableNumClickHandler(event){
+  if(SELECTED_NUM == null) {
+    event.currentTarget.classList.remove("selectable");
+    event.currentTarget.classList.add("selected");
+    SELECTED_NUM = event.currentTarget;
+  }
+  else if(event.currentTarget == SELECTED_NUM) {
+    event.currentTarget.classList.remove("selected");
+    event.currentTarget.classList.add("selectable");
+    SELECTED_NUM = null;
+  }
+  else {
+    var num1 = parseInt(SELECTED_NUM.getAttribute("value"));
+    var num2 = parseInt(event.currentTarget.getAttribute("value"));
+    var result = null;
+    if (SELECTED_OP.innerText == "+") {
+      result = num1 + num2;
+    }
+    else if(SELECTED_OP.innerText == "-") {
+      result = (num1 > num2) ? (num1 - num2) : (num2 - num1);
+    }
+    else if(SELECTED_OP.innerText == "*") {
+      result = num1 * num2;
+    }
+    else if(SELECTED_OP.innerText == "/" && (num1 % num2 == 0)) {
+      result = num1 / num2;
+    }
+    else if(SELECTED_OP.innerText == "^") {
+      result = Math.pow(num1, num2);
+    }
+
+    if (result != null) {
+      makeNum(result + '', SELECTED_NUM.getAttribute("data-x"), SELECTED_NUM.getAttribute("data-y"));
+      SELECTED_NUM.parentNode.removeChild(SELECTED_NUM);
+      event.currentTarget.parentNode.removeChild(event.currentTarget);
+    }
+    SELECTED_NUM = null;
+    $(".operation").removeClass("selected");
+    $(".num").removeClass("selectable");
+    $(".num").off("click", selectableNumClickHandler);
+    resetAllNumSnaps();
+    checkGoal();
+  }
+}
+
 function setupOperations() {
-  interact(".operation").dropzone({
-    accept: ".num",
-    overlap: 0.5,
-    ondrop: function (event) {
-      console.log("dropped in an operation!");
-      console.log(event.target.innerText);
-      console.log(event.relatedTarget.getAttribute('value'));
-    },
-    ondragenter: function (event) {
-      event.target.classList.add('over');
-    },
-    ondragleave: function (event) {
-      event.target.classList.remove('over');
+  $(".operation").on("click", function(event) {
+    if(event.target.classList.contains("selected")) {
+      event.target.classList.remove("selected");
+      $(".num").removeClass("selectable");
+      $(".num").removeClass("selected");
+      $(".num").off("click", selectableNumClickHandler)
+      SELECTED_NUM = null;
+    }
+    else {
+      $(".operation").removeClass("selected");
+
+      // Selected op is visually selected and set in global
+      event.target.classList.add("selected");
+      SELECTED_OP = event.target;
+
+      // Numbers into 'selectable' mode now: selectable class and event handler
+      $(".num").addClass("selectable");
+      $(".num").on("click", selectableNumClickHandler);
     }
   });
 }
 
-setupLevel(0);
+//setupLevel(0);
+setupRandomLevel();
 setupOperations();
 document.getElementById('scissors').addEventListener('click', splitAllNums);
