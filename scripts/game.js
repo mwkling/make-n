@@ -18,6 +18,7 @@ var levels = [
   {nums: [1, 2, 3], goal: 5},  // Multiple ways
   {nums: [8, 4, 5], goal: 10},
   {nums: [1, 2, 3], goal: 10}, // Exponents
+  {nums: [2, 5, 1], goal: 36},
   {nums: [2, 5, 1], goal: 33},
 
   // Concatenation
@@ -31,12 +32,15 @@ var levels = [
   {nums: [4, 4], goal: 53},
 
   // Harder
+  {nums: [7, 4, 6], goal: 6},
+  {nums: [4, 8, 4], goal: 4},
   {nums: [6, 8, 6], goal: 82},
   {nums: [4, 1, 2], goal: 46},
   {nums: [7, 7, 2], goal: 47},
   {nums: [7, 8, 8], goal: 72},
   {nums: [3, 2, 6], goal: 71},
-  {nums: [5, 6, 5], goal: 59}
+  {nums: [5, 6, 5], goal: 59},
+  {nums: [5, 6, 5], goal: 10}
 ];
 
 function getRandomInt(min, max) {
@@ -45,46 +49,46 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function setupRandomLevel() {
-  var value = "";
+function setupLevel(nums, goal) {
   var offset = 100;
+  var value = "";
 
   $(".num").remove();
-  for(var i = 0; i < 3; i++) {
-    value = getRandomInt(1, 9) + '';
+  for(var i = 0; i < nums.length; i++) {
+    value = nums[i] + '';
     makeNum(value, offset, 100);
     offset = offset + (BOX_WIDTH * value.length) + 10;
   }
-  var goal = getRandomInt(1, 100);
   document.getElementById("goal").innerHTML = goal;
   CURRENT_GOAL = goal;
+
+  // TODO: why is this necessary...?
+  resetAllNumSnaps();
 }
 
-function setupLevel(i) {
-  CURRENT_LEVEL = i;
-  var level = levels[i];
-  var offset = 100;
-  var value = "";
+function setupLevelN(n) {
+  CURRENT_LEVEL = n;
+  level = levels[n];
+  setupLevel(level.nums, level.goal);
+}
 
-  $(".num").remove();
-  for(var i = 0; i < level.nums.length; i++) {
-    value = level.nums[i] + '';
-    makeNum(value, offset, 100);
-    offset = offset + (BOX_WIDTH * value.length) + 10;
+function setupRandomLevel() {
+  CURRENT_LEVEL = null;
+
+  var goal = getRandomInt(1, 100);
+  var nums = [];
+  for(var i = 0; i < 3; i++) {
+    nums.push(getRandomInt(1, 9));
   }
-  document.getElementById("goal").innerHTML = level.goal;
+  setupLevel(nums, 10);
 }
 
 function checkGoal() {
-  //var goal = levels[CURRENT_LEVEL].goal + '';
-  var goal = CURRENT_GOAL;
-
   var nums = document.querySelectorAll(".num");
   if(nums.length == 1) {
-    if(nums[0].getAttribute("value") == goal) {
+    if(nums[0].getAttribute("value") == CURRENT_GOAL) {
       alert("yay");
-      //CURRENT_LEVEL += 1;
-      //setupLevel(CURRENT_LEVEL);
+      // TODO: return something? increment level in some cases?
       setupRandomLevel();
     }
   }
@@ -217,8 +221,8 @@ function resetAllNumSnaps() {
 
     var targets = notMySquare.map(function(num){
       var pos = $(num).offset();
-      var digits = $(num).children().length
-      var myDigits = $(nums[i]).children().length
+      var digits = $(num).children().length;
+      var myDigits = $(nums[i]).children().length;
 
       return [
         function(x, y) {
@@ -247,10 +251,21 @@ function resetAllNumSnaps() {
           targets: targets,
           relativePoints: [ { x: 0, y: 0 } ]
         }
+      })
+      .actionChecker(function (pointer, event, action, that, element, interaction) {
+        // No dragging numbers when in selection mode
+        if($(element).hasClass("selected") || $(element).hasClass("selectable")) {
+          return null;
+        } else {
+          return action;
+        }
       });
+    ;
   }
 }
 
+// Call when we are in 'select' mode and a number gets clicked, to possibly
+// perform a math operation
 function selectableNumClickHandler(event){
   if(SELECTED_NUM == null) {
     event.currentTarget.classList.remove("selectable");
@@ -319,7 +334,7 @@ function setupOperations() {
   });
 }
 
-//setupLevel(0);
+//setupLevelN(0);
 setupRandomLevel();
 setupOperations();
 document.getElementById('scissors').addEventListener('click', splitAllNums);
