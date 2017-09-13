@@ -7,27 +7,26 @@ var COUNTER = 5;
 var SELECTED_NUM = null;
 var SELECTED_OP = null;
 
-var CURRENT_LEVEL = null;
 var CURRENT_GOAL = null;
 
 var levels = [
   // Basic operations
-  {nums: [1, 1], goal: 2},
+  {nums: [1, 1], goal: 2, hint: "To add two numbers, click the + button, then click on the two numbers you want to add."},
   {nums: [3, 4], goal: 12},
   {nums: [1, 2, 3], goal: 7},
-  {nums: [1, 2, 3], goal: 5},  // Multiple ways
+  {nums: [1, 2, 3], goal: 5, hint: "Sometimes, puzzles can be solved multiple ways."},  // Multiple ways
   {nums: [8, 4, 5], goal: 10},
-  {nums: [1, 2, 3], goal: 10}, // Exponents
+  {nums: [1, 2, 3], goal: 10, hint: "Use exponents."}, // Exponents
   {nums: [2, 5, 1], goal: 36},
   {nums: [2, 5, 1], goal: 33},
 
   // Concatenation
-  {nums: [1, 1], goal: 11},
+  {nums: [1, 1], goal: 11, hint: "You can concatenate digits by dragging one next to the other."},
   {nums: [4, 4, 8], goal: 81},
   {nums: [1, 2, 3], goal: 36},
 
   // Digit splitting
-  {nums: [7, 8], goal: 65},
+  {nums: [7, 8], goal: 65, hint: "Click on the scissors to split numbers into their digits."},
   {nums: [6, 3], goal: 10},
   {nums: [4, 4], goal: 53},
 
@@ -40,7 +39,9 @@ var levels = [
   {nums: [7, 8, 8], goal: 72},
   {nums: [3, 2, 6], goal: 71},
   {nums: [5, 6, 5], goal: 59},
-  {nums: [5, 6, 5], goal: 10}
+  {nums: [5, 6, 5], goal: 10},
+  {nums: [1, 3, 7], goal: 48},
+  {nums: [5, 7, 7, 3], goal: 150}
 ];
 
 function getRandomInt(min, max) {
@@ -49,32 +50,39 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function setupLevel(nums, goal) {
-  var offset = 100;
+function setupLevel(nums, goal, hint) {
+  var offset = BOX_WIDTH;
   var value = "";
 
   $(".num").remove();
   for(var i = 0; i < nums.length; i++) {
     value = nums[i] + '';
-    makeNum(value, offset, 100);
+    makeNum(value, offset, BOX_WIDTH);
     offset = offset + (BOX_WIDTH * value.length) + 10;
   }
   document.getElementById("goal").innerHTML = goal;
   CURRENT_GOAL = goal;
 
+  if(!!hint) {
+    document.getElementById("hint").classList.remove("hidden");
+    document.getElementById("hint").innerText = "Hint: " + hint;
+  }
+  else {
+    document.getElementById("hint").classList.add("hidden");
+  }
   // TODO: why is this necessary...?
   resetAllNumSnaps();
 }
 
-function setupLevelN(n) {
-  CURRENT_LEVEL = n;
-  level = levels[n];
-  setupLevel(level.nums, level.goal);
+function setupCurrentLevel() {
+  var level_sel = document.getElementById('level-select');
+
+  var current_level = level_sel.options[level_sel.selectedIndex].text * 1;
+  var level = levels[current_level - 1];
+  setupLevel(level.nums, level.goal, level.hint);
 }
 
 function setupRandomLevel() {
-  CURRENT_LEVEL = null;
-
   var start_sel = document.getElementById("starting-digits");
   var max_sel = document.getElementById("max-goal");
 
@@ -90,14 +98,20 @@ function setupRandomLevel() {
 }
 
 function checkGoal() {
-  var nums = document.querySelectorAll(".num");
-  if(nums.length == 1) {
-    if(nums[0].getAttribute("value") == CURRENT_GOAL) {
-      alert("yay");
-      // TODO: do the appropriate thing depending on mode
-      setupRandomLevel();
+  setTimeout(function () {
+    var nums = document.querySelectorAll(".num");
+    if(nums.length == 1) {
+      if(nums[0].getAttribute("value") == CURRENT_GOAL) {
+        alert("Sucess!");
+        if(getMode() == "Levels") {
+          setupNextLevel();
+        }
+        else {
+          setupRandomLevel();
+        }
+      }
     }
-  }
+  }, 100);
 }
 
 function makeNum(numString, x, y) {
@@ -319,8 +333,8 @@ function selectableNumClickHandler(event){
 
 function setupOperations() {
   $(".operation").on("click", function(event) {
-    if(event.target.classList.contains("selected")) {
-      event.target.classList.remove("selected");
+    if(event.currentTarget.classList.contains("selected")) {
+      event.currentTarget.classList.remove("selected");
       $(".num").removeClass("selectable");
       $(".num").removeClass("selected");
       $(".num").off("click", selectableNumClickHandler)
@@ -330,8 +344,8 @@ function setupOperations() {
       $(".operation").removeClass("selected");
 
       // Selected op is visually selected and set in global
-      event.target.classList.add("selected");
-      SELECTED_OP = event.target;
+      event.currentTarget.classList.add("selected");
+      SELECTED_OP = event.currentTarget;
 
       // Numbers into 'selectable' mode now: selectable class and event handler
       $(".num").addClass("selectable");
@@ -340,29 +354,41 @@ function setupOperations() {
   });
 }
 
-function updateSettings() {
+function getMode() {
   var mode_select = document.getElementById("mode-select");
-  var mode = mode_select.options[mode_select.selectedIndex].text;
-  if(mode == "Levels") {
+  return mode_select.options[mode_select.selectedIndex].text;
+}
+
+function updateSettings() {
+  if(getMode() == "Levels") {
     document.getElementById("level-settings").classList.remove("hidden");
     document.getElementById("random-settings").classList.add("hidden");
     document.getElementById("next-level").classList.remove("hidden");
+    document.getElementById("restart-level").classList.remove("hidden");
     document.getElementById("new-random").classList.add("hidden");
-    // TODO: initialize level
+    setupCurrentLevel();
   }
   else {
     document.getElementById("random-settings").classList.remove("hidden");
     document.getElementById("level-settings").classList.add("hidden");
     document.getElementById("next-level").classList.add("hidden");
+    document.getElementById("restart-level").classList.add("hidden");
     document.getElementById("new-random").classList.remove("hidden");
-
-    // TODO: initialize random
+    setupRandomLevel();
   }
 }
 
-//setupLevelN(0);
-setupRandomLevel();
+function setupNextLevel() {
+  document.getElementById('level-select').selectedIndex += 1;
+  setupCurrentLevel();
+}
+
+setupCurrentLevel();
+//setupRandomLevel();
 setupOperations();
 document.getElementById('scissors').addEventListener('click', splitAllNums);
 document.getElementById('mode-select').addEventListener('change', updateSettings);
 document.getElementById('new-random').addEventListener('click', setupRandomLevel);
+document.getElementById('level-select').addEventListener('change', setupCurrentLevel);
+document.getElementById('next-level').addEventListener('click', setupNextLevel);
+document.getElementById('restart-level').addEventListener('click', setupCurrentLevel);
