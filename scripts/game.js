@@ -75,12 +75,18 @@ function setupLevelN(n) {
 function setupRandomLevel() {
   CURRENT_LEVEL = null;
 
-  var goal = getRandomInt(1, 100);
+  var start_sel = document.getElementById("starting-digits");
+  var max_sel = document.getElementById("max-goal");
+
+  var maxGoal = max_sel.options[max_sel.selectedIndex].text * 1;
+  var startingDigits = start_sel.options[start_sel.selectedIndex].text * 1;
+
+  var goal = getRandomInt(1, maxGoal);
   var nums = [];
-  for(var i = 0; i < 3; i++) {
+  for(var i = 0; i < startingDigits; i++) {
     nums.push(getRandomInt(1, 9));
   }
-  setupLevel(nums, 10);
+  setupLevel(nums, goal);
 }
 
 function checkGoal() {
@@ -88,7 +94,7 @@ function checkGoal() {
   if(nums.length == 1) {
     if(nums[0].getAttribute("value") == CURRENT_GOAL) {
       alert("yay");
-      // TODO: return something? increment level in some cases?
+      // TODO: do the appropriate thing depending on mode
       setupRandomLevel();
     }
   }
@@ -109,7 +115,7 @@ function makeNum(numString, x, y) {
     $(newDigit).appendTo(newNum);
   }
 
-  $(newNum).appendTo("#game");
+  $(newNum).appendTo("#game-canvas");
 
   newNum.style.webkitTransform =
     newNum.style.transform =
@@ -144,7 +150,7 @@ function splitAllNums() {
           value: digit.innerText
         })[0];
         $(digit).appendTo(newNum);
-        $(newNum).appendTo("#game");
+        $(newNum).appendTo("#game-canvas");
 
         var newX = x + (i * (BOX_WIDTH + 10));
         newNum.style.webkitTransform =
@@ -281,19 +287,19 @@ function selectableNumClickHandler(event){
     var num1 = parseInt(SELECTED_NUM.getAttribute("value"));
     var num2 = parseInt(event.currentTarget.getAttribute("value"));
     var result = null;
-    if (SELECTED_OP.innerText == "+") {
+    if (SELECTED_OP.id == "plus") {
       result = num1 + num2;
     }
-    else if(SELECTED_OP.innerText == "-") {
+    else if(SELECTED_OP.id == "minus") {
       result = (num1 > num2) ? (num1 - num2) : (num2 - num1);
     }
-    else if(SELECTED_OP.innerText == "*") {
+    else if(SELECTED_OP.id == "times") {
       result = num1 * num2;
     }
-    else if(SELECTED_OP.innerText == "/" && (num1 % num2 == 0)) {
+    else if(SELECTED_OP.id == "divide" && (num1 % num2 == 0)) {
       result = num1 / num2;
     }
-    else if(SELECTED_OP.innerText == "^") {
+    else if(SELECTED_OP.id == "power") {
       result = Math.pow(num1, num2);
     }
 
@@ -334,7 +340,29 @@ function setupOperations() {
   });
 }
 
+function updateSettings() {
+  var mode_select = document.getElementById("mode-select");
+  var mode = mode_select.options[mode_select.selectedIndex].text;
+  if(mode == "Levels") {
+    document.getElementById("level-settings").classList.remove("hidden");
+    document.getElementById("random-settings").classList.add("hidden");
+    document.getElementById("next-level").classList.remove("hidden");
+    document.getElementById("new-random").classList.add("hidden");
+    // TODO: initialize level
+  }
+  else {
+    document.getElementById("random-settings").classList.remove("hidden");
+    document.getElementById("level-settings").classList.add("hidden");
+    document.getElementById("next-level").classList.add("hidden");
+    document.getElementById("new-random").classList.remove("hidden");
+
+    // TODO: initialize random
+  }
+}
+
 //setupLevelN(0);
 setupRandomLevel();
 setupOperations();
 document.getElementById('scissors').addEventListener('click', splitAllNums);
+document.getElementById('mode-select').addEventListener('change', updateSettings);
+document.getElementById('new-random').addEventListener('click', setupRandomLevel);
