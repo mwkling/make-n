@@ -325,6 +325,7 @@ function selectableNumClickHandler(event){
     SELECTED_NUM = null;
     $(".operation").removeClass("selected");
     $(".num").removeClass("selectable");
+    $(".num").removeClass("selected");
     $(".num").off("click", selectableNumClickHandler);
     resetAllNumSnaps();
     checkGoal();
@@ -337,11 +338,12 @@ function setupOperations() {
       event.currentTarget.classList.remove("selected");
       $(".num").removeClass("selectable");
       $(".num").removeClass("selected");
-      $(".num").off("click", selectableNumClickHandler)
+      $(".num").off("click", selectableNumClickHandler);
       SELECTED_NUM = null;
     }
     else {
       $(".operation").removeClass("selected");
+      $(".num").off("click", selectableNumClickHandler);
 
       // Selected op is visually selected and set in global
       event.currentTarget.classList.add("selected");
