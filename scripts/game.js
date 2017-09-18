@@ -258,7 +258,7 @@ function resetAllNumSnaps() {
 
     interact("#" + id)
       .draggable({
-        inertia: true,
+        inertia: false,
         restrict: {
           restriction: "parent",
           endOnly: "true",
