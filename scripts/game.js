@@ -1,7 +1,6 @@
 'use strict';
 
 var BOX_WIDTH = 50;
-var HALF_BOX = 25;
 var COUNTER = 5;
 
 var SELECTED_NUM = null;
@@ -41,7 +40,8 @@ var levels = [
   {nums: [5, 6, 5], goal: 59},
   {nums: [5, 6, 5], goal: 10},
   {nums: [1, 3, 7], goal: 48},
-  {nums: [5, 7, 7, 3], goal: 150}
+  {nums: [5, 7, 7, 3], goal: 150},
+  {nums: [4, 4, 2], goal: 26, par: 3}
 ];
 
 function getRandomInt(min, max) {
@@ -156,8 +156,8 @@ function splitAllNums() {
       // Value is now only the first digit
       num.setAttribute('value', num.getAttribute('value')[0]);
 
-      for (var i = 1; i < digits.length; i++) {
-        var digit = digits[i];
+      for (var j = 1; j < digits.length; j++) {
+        var digit = digits[j];
         var newNum = jQuery('<div/>', {
           id: ("box" + COUNTER),
           class: "num",
@@ -166,7 +166,7 @@ function splitAllNums() {
         $(digit).appendTo(newNum);
         $(newNum).appendTo("#game-canvas");
 
-        var newX = x + (i * (BOX_WIDTH + 10));
+        var newX = x + (j * (BOX_WIDTH + 10));
         newNum.style.webkitTransform =
           newNum.style.transform =
             'translate(' + newX + 'px, ' + y + 'px)';
