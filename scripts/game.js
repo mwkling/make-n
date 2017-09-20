@@ -10,38 +10,38 @@ var CURRENT_GOAL = null;
 
 var levels = [
   // Basic operations
-  {nums: [1, 1], goal: 2, hint: "To add two numbers, click the + button, then click on the two numbers you want to add."},
-  {nums: [3, 4], goal: 12},
-  {nums: [1, 2, 3], goal: 7},
-  {nums: [1, 2, 3], goal: 5, hint: "Sometimes, puzzles can be solved multiple ways."},  // Multiple ways
-  {nums: [8, 4, 5], goal: 10},
-  {nums: [1, 2, 3], goal: 10, hint: "Use exponents."}, // Exponents
-  {nums: [2, 5, 1], goal: 36},
-  {nums: [2, 5, 1], goal: 33},
+  {nums: [1, 1], goal: 2, par: 1, hint: "To add two numbers, click the + button, then click on the two numbers you want to add."},
+  {nums: [3, 4], par: 1, goal: 12},
+  {nums: [1, 2, 3], par: 2, goal: 7},
+  {nums: [1, 2, 3], par: 2, goal: 5, hint: "Sometimes, puzzles can be solved multiple ways."},  // Multiple ways
+  {nums: [8, 4, 5], par: 2, goal: 10},
+  {nums: [1, 2, 3], par: 2, goal: 10, hint: "Use exponents."}, // Exponents
+  {nums: [2, 5, 1], par: 2, goal: 36},
+  {nums: [2, 5, 1], par: 2, goal: 33},
 
   // Concatenation
-  {nums: [1, 1], goal: 11, hint: "You can concatenate digits by dragging one next to the other."},
-  {nums: [4, 4, 8], goal: 81},
-  {nums: [1, 2, 3], goal: 36},
+  {nums: [1, 1], par: 0, goal: 11, hint: "You can concatenate digits by dragging one next to the other."},
+  {nums: [4, 4, 8], par: 1,  goal: 81},
+  {nums: [1, 2, 3], par: 1, goal: 36},
 
   // Digit splitting
-  {nums: [7, 8], goal: 65, hint: "Click on the scissors to split numbers into their digits."},
-  {nums: [6, 3], goal: 10},
-  {nums: [4, 4], goal: 53},
+  {nums: [7, 8], par: 1, goal: 65, hint: "Click on the scissors to split numbers into their digits."},
+  {nums: [4, 4], par: 2, goal: 53},
 
   // Harder
-  {nums: [7, 4, 6], goal: 6},
-  {nums: [4, 8, 4], goal: 4},
-  {nums: [6, 8, 6], goal: 82},
-  {nums: [4, 1, 2], goal: 46},
-  {nums: [7, 7, 2], goal: 47},
-  {nums: [7, 8, 8], goal: 72},
-  {nums: [3, 2, 6], goal: 71},
-  {nums: [5, 6, 5], goal: 59},
-  {nums: [5, 6, 5], goal: 10},
-  {nums: [1, 3, 7], goal: 48},
-  {nums: [5, 7, 7, 3], goal: 150},
-  {nums: [4, 4, 2], goal: 26, par: 3}
+  {nums: [7, 4, 6], par: 2, goal: 6},
+  {nums: [4, 8, 4], par: 3, goal: 4},
+  {nums: [6, 8, 6], par: 2, goal: 82},
+  {nums: [4, 1, 2], par: 2, goal: 46},
+  {nums: [7, 7, 2], par: 2, goal: 47},
+  {nums: [7, 8, 8], par: 2, goal: 72},
+  {nums: [3, 2, 6], par: 1, goal: 71},
+  {nums: [5, 6, 5], par: 2, goal: 59},
+  {nums: [5, 6, 5], par: 3, goal: 10},
+  {nums: [1, 3, 7], par: 3, goal: 48},
+  {nums: [5, 7, 7, 3], par: 2, goal: 150},
+  {nums: [4, 4, 2], par: 3, goal: 26, par: 3},
+  {nums: [6, 3], par: 4, goal: 10}
 ];
 
 function getRandomInt(min, max) {
@@ -50,7 +50,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function setupLevel(nums, goal, hint) {
+function setupLevel(nums, goal, hint, par) {
   var offset = BOX_WIDTH;
   var value = "";
 
@@ -70,6 +70,16 @@ function setupLevel(nums, goal, hint) {
   else {
     document.getElementById("hint").classList.add("hidden");
   }
+
+  if(!!par) {
+    document.getElementById("par-text").classList.remove("hidden");
+    document.getElementById("par").innerText = par;
+  }
+  else {
+    document.getElementById("par-text").classList.add("hidden");
+  }
+
+  document.getElementById("num-steps").innerText = 0;
   // TODO: why is this necessary...?
   resetAllNumSnaps();
 }
@@ -79,7 +89,7 @@ function setupCurrentLevel() {
 
   var current_level = level_sel.options[level_sel.selectedIndex].text * 1;
   var level = levels[current_level - 1];
-  setupLevel(level.nums, level.goal, level.hint);
+  setupLevel(level.nums, level.goal, level.hint, level.par);
 }
 
 function setupRandomLevel() {
@@ -321,6 +331,8 @@ function selectableNumClickHandler(event){
       makeNum(result + '', SELECTED_NUM.getAttribute("data-x"), SELECTED_NUM.getAttribute("data-y"));
       SELECTED_NUM.parentNode.removeChild(SELECTED_NUM);
       event.currentTarget.parentNode.removeChild(event.currentTarget);
+      var steps = document.getElementById("num-steps").innerText * 1;
+      document.getElementById("num-steps").innerText = steps + 1;
     }
     SELECTED_NUM = null;
     $(".operation").removeClass("selected");
