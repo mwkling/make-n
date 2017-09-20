@@ -112,7 +112,7 @@ function checkGoal() {
     var nums = document.querySelectorAll(".num");
     if(nums.length == 1) {
       if(nums[0].getAttribute("value") == CURRENT_GOAL) {
-        alert("Sucess!");
+        alert("Success!");
         if(getMode() == "Levels") {
           setupNextLevel();
         }
@@ -397,6 +397,11 @@ function setupNextLevel() {
   setupCurrentLevel();
 }
 
+function playGame() {
+  document.getElementById("instructions").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+}
+
 setupCurrentLevel();
 //setupRandomLevel();
 setupOperations();
@@ -406,3 +411,4 @@ document.getElementById('new-random').addEventListener('click', setupRandomLevel
 document.getElementById('level-select').addEventListener('change', setupCurrentLevel);
 document.getElementById('next-level').addEventListener('click', setupNextLevel);
 document.getElementById('restart-level').addEventListener('click', setupCurrentLevel);
+document.getElementById('play').addEventListener('click', playGame);

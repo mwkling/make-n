@@ -1,4 +1,4 @@
-.num {
+.num, .inum, .onum {
   height: 50px;
   background-color: #29e;
   color: white;
@@ -13,6 +13,20 @@
   position: absolute;
   z-index: 100;
   cursor: pointer;
+}
+
+.inum, .onum {
+  display: inline-block;
+  position: static;
+}
+
+.onum {
+  color: black;
+  background-color: white;
+}
+
+#instructions span {
+  font-size: 32px;
 }
 
 .num.selectable {
