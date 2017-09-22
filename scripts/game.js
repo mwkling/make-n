@@ -112,13 +112,7 @@ function checkGoal() {
     var nums = document.querySelectorAll(".num");
     if(nums.length == 1) {
       if(nums[0].getAttribute("value") == CURRENT_GOAL) {
-        alert("Success!");
-        if(getMode() == "Levels") {
-          setupNextLevel();
-        }
-        else {
-          setupRandomLevel();
-        }
+        $("#success-modal").modal();
       }
     }
   }, 100);
@@ -403,7 +397,6 @@ function playGame() {
 }
 
 setupCurrentLevel();
-//setupRandomLevel();
 setupOperations();
 document.getElementById('scissors').addEventListener('click', splitAllNums);
 document.getElementById('mode-select').addEventListener('change', updateSettings);
@@ -412,3 +405,12 @@ document.getElementById('level-select').addEventListener('change', setupCurrentL
 document.getElementById('next-level').addEventListener('click', setupNextLevel);
 document.getElementById('restart-level').addEventListener('click', setupCurrentLevel);
 document.getElementById('play').addEventListener('click', playGame);
+
+$("#success-modal").on("hidden.bs.modal", function (e) {
+  if(getMode() == "Levels") {
+    setupNextLevel();
+  }
+  else {
+    setupRandomLevel();
+  }
+});
