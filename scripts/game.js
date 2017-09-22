@@ -323,7 +323,7 @@ function selectableNumClickHandler(event){
     else if(SELECTED_OP.id == "divide" && (num1 % num2 == 0)) {
       result = num1 / num2;
     }
-    else if(SELECTED_OP.id == "power") {
+    else if(SELECTED_OP.id == "power" && Math.pow(num1, num2) < 1000000) {
       result = Math.pow(num1, num2);
     }
 
