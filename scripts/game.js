@@ -231,9 +231,47 @@ function dragEndListener (event) {
   checkGoal();
 }
 
+// TODO this is similar to resetAllNumSnaps?  combine somehow?
+function fixOverlaps() {
+  var nums = [].slice.call(document.querySelectorAll(".num"));
+
+  for (var i = 0; i < nums.length; i++) {
+    var id = nums[i].id;
+
+    var myDigits = $(nums[i]).children().length;
+    var myX = parseFloat(nums[i].getAttribute('data-x') || 0);
+    var myY = parseFloat(nums[i].getAttribute('data-y') || 0);
+
+    var notMySquare = nums.filter(function(num) {
+      return id != num.id;
+    });
+
+    for (var j = 0; j < notMySquare.length; j++) {
+      var digits = $(notMySquare[j]).children().length;
+      var num = notMySquare[j];
+      var x = (parseFloat(num.getAttribute('data-x')) || 0),
+          y = (parseFloat(num.getAttribute('data-y')) || 0);
+
+      // Overlap check
+      if(!(myX + myDigits * BOX_WIDTH <= x) &&
+         !(myX >= x + digits * BOX_WIDTH) &&
+         !(myY + BOX_WIDTH <= y) &&
+         !(myY >= y + BOX_WIDTH)) {
+           // Always fix overlaps by moving box down
+           var newY = myY + BOX_WIDTH + 5;
+          num.style.webkitTransform =
+            num.style.transform =
+              'translate(' + x + 'px, ' + newY + 'px)';
+          num.setAttribute('data-y', newY);
+         }
+    }
+  }
+}
+
 // Sets up all the appropriate snapping for joining different numbers
 // Call again whenever numbers change somehow
 function resetAllNumSnaps() {
+  fixOverlaps();
   var nums = [].slice.call(document.querySelectorAll(".num"));
 
   for (var i = 0; i < nums.length; i++) {
@@ -322,9 +360,16 @@ function selectableNumClickHandler(event){
     }
 
     if (result != null) {
-      makeNum(result + '', SELECTED_NUM.getAttribute("data-x"), SELECTED_NUM.getAttribute("data-y"));
+      var x = SELECTED_NUM.getAttribute("data-x");
+      var y = SELECTED_NUM.getAttribute("data-y");
+
+      // Remove two old numbers
       SELECTED_NUM.parentNode.removeChild(SELECTED_NUM);
       event.currentTarget.parentNode.removeChild(event.currentTarget);
+
+      // Create new number in place of old
+      makeNum(result + '', x, y);
+
       var steps = document.getElementById("num-steps").innerText * 1;
       document.getElementById("num-steps").innerText = steps + 1;
     }
